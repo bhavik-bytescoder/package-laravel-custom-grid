@@ -1,5 +1,5 @@
 {
-    "name": "datagrid/src",
+    "name": "bytestechnolabs/datagrid",
     "type": "library",
     "license": "MIT",
     "autoload": {
@@ -13,8 +13,7 @@
             "email": "bhavik@bytestechnolab.com"
         }
     ],
-    "require": {
-    },
+    "require": {},
     "minimum-stability": "stable"
 
 }
