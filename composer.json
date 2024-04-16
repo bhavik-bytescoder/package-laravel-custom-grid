@@ -13,6 +13,9 @@
             "email": "bhavik@bytestechnolab.com"
         }
     ],
-    "require": {},
-    "minimum-stability": "stable"
+    "require": {
+        "datagrid/src": "^1.0"
+    },
+    "minimum-stability": "dev"
+
 }
