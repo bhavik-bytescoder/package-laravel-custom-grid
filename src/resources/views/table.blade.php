@@ -4,20 +4,21 @@
             <div class="layout-page">
                 <div class="content-wrapper">
                     <div class="container-xxl flex-grow-1 container-p-y">
-                        <div class="row">
-                            <div class="col-md-5">
+                        <div class="row select-z">
+                            <div class="col-xl-5">
                                 <form id= "filter-form">
                                     <div class="input-group mb-3">
                                         <input type="text" class="form-control" placeholder="Search..."
                                             name="search" id="search" value="{{ request()->get('search') }}">
                                         <label class="error"></label>
-                                        <button class="btn btn-primary" id="search-btn" type="button">Search</button>
+                                        <button class="btn btn-primary" id="search-btn"
+                                            type="button">{{ __('datagrid::grid.Search') }}</button>
                                         <a href="{{ route(class_basename($model) . '.index') }}"
                                             class="btn btn-secondary">Reset</a>
                                     </div>
                                 </form>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-xl-5">
                                 <div class="dropdown-container">
                                     <div class="dropdown" data-control="checkbox-dropdown">
                                         <label class="dropdown-label">Select</label>
@@ -35,7 +36,6 @@
                                                                 continue;
                                                             }
                                                             $checked = in_array($column, $columns);
-                                                            // $disabled = $column == 'id' ? 'disabled' : '';
                                                         @endphp
                                                         <div class="columns-list">
                                                             <label class="dropdown-option">
@@ -53,33 +53,37 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-xl-2">
                                 <button type="button" id="delete-selected" class="btn btn-danger">Delete
                                     Selected</button>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <button type="button" class="btn btn-primary create-button" data-toggle="modal"
-                                data-target="#createModal">
-                                Create
-                            </button>
-                        </div>
-                        <div class="col-md-9 text-end mt-3">
-                            <div class="showing-rows-info pull-right">
-                                <span>@lang('datagrid::grid.Showing') </span>
-                                <select name="rows-per-page">
-                                    @php
-                                        $currentRowsPerPage = isset($_GET['rows-per-page'])
-                                            ? $_GET['rows-per-page']
-                                            : $rowsPerPage;
-                                    @endphp
-                                    @foreach (config('datagrid.rowsPerPage') as $nr)
-                                        <option value="{{ $nr }}"
-                                            {{ $nr == $currentRowsPerPage ? 'selected' : '' }}>
-                                            {{ $nr }}</option>
-                                    @endforeach
-                                </select>
-                                <span>@lang('datagrid::grid.rows per page.')</span>
+                        <div class="row mt-10">
+                            <div class="col-sm-3">
+                                @if (config('datagrid.' . class_basename($model) . '_has_create_option'))
+                                    <button type="button" class="btn btn-primary create-button" data-toggle="modal"
+                                        data-target="#createModal">
+                                        Create
+                                    </button>
+                                @endif
+                            </div>
+                            <div class="col-sm-9 text-end mt-3">
+                                <div class="showing-rows-info pull-right">
+                                    <span>@lang('datagrid::grid.Showing') </span>
+                                    <select name="rows-per-page">
+                                        @php
+                                            $currentRowsPerPage = isset($_GET['rows-per-page'])
+                                                ? $_GET['rows-per-page']
+                                                : $rowsPerPage;
+                                        @endphp
+                                        @foreach (config('datagrid.rowsPerPage') as $nr)
+                                            <option value="{{ $nr }}"
+                                                {{ $nr == $currentRowsPerPage ? 'selected' : '' }}>
+                                                {{ $nr }}</option>
+                                        @endforeach
+                                    </select>
+                                    <span>@lang('datagrid::grid.rows per page.')</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -94,9 +98,11 @@
                                             @foreach ($columns as $column)
                                                 @if ($column != 'id')
                                                     <th scope="col" class="column" id="{{ $column }}">
-                                                        <a href="{{ $urlOrder }}&sort_by={{ $column }}&sort_order={{ request()->sort_order == 'desc' && request()->sort_by == $column ? 'asc' : 'desc' }}"
+                                                        <a class="arrow-btn"
+                                                            href="{{ $urlOrder }}&sort_by={{ $column }}&sort_order={{ request()->sort_order == 'desc' && request()->sort_by == $column ? 'asc' : 'desc' }}"
                                                             title="@lang('Datagrid::grid.Order descending')"
-                                                            class="arrow-down">{{ $column }}</a>
+                                                            class="arrow-down">{{ $column }} <i
+                                                                class="fa fa-exchange" aria-hidden="true"></i></a>
                                                     </th>
                                                 @endif
                                             @endforeach
@@ -116,24 +122,23 @@
                                                     @if ($column != 'id')
                                                         <td class="column" data-column="{{ $column }}">
                                                             @if ($column == config('datagrid.' . class_basename($model) . '_has_image'))
-                                                            <img src="{{ !empty($row[$column]) ? asset('storage/' . class_basename($model) . '/' . $row[$column]) : 'https://www.pngall.com/wp-content/uploads/5/Profile-Male-PNG.png' }}" alt="Image" style="width: 100px; height: auto;">
+                                                                <img src="{{ !empty($row[$column]) ? asset('storage/' . class_basename($model) . '/' . $row[$column]) : asset('storage/default/default.png') }}"
+                                                                    alt="Image" style="width: 100px; height: auto;">
                                                             @else
                                                                 {{ $row[$column] }}
                                                             @endif
                                                         </td>
                                                     @endif
                                                 @endforeach
-                                                @if (config('datagrid.' . class_basename($model) . '_has_edit_option') == null)
-                                                    <td style="padding: 50px 20px 50px 50px;text-align: right;">
+                                                <td style="padding: 15px 0px 15px 15px;">
+                                                    @if (config('datagrid.' . class_basename($model) . '_has_edit_option'))
                                                         <a href="#" class="edit-button" data-toggle="modal"
                                                             data-target="#editModal" data-id="{{ $row['id'] }}">
                                                             <i class="fas fa-pencil-alt"></i>
                                                         </a>
-                                                    </td>
-                                                @endif
-                                                <td style="padding: 5px;">
+                                                    @endif
                                                     <form id="delete-form" method="POST"
-                                                        action="users/{{ $row['id'] }}">
+                                                        action="users/{{ $row['id'] }}" style="display: inline-block; margin-left:10px">
                                                         @csrf
                                                         @method('DELETE')
                                                         <input type="hidden" name="model" id="model"
@@ -149,12 +154,12 @@
                                     @empty
                                         <tr>
                                             <td colspan="{{ count($columns) + (count($columns) > 1 ? 1 : 2) }}"
-                                                class="text-center">No Data Found</td>
+                                                class="text-center">@lang('datagrid::grid.No results found.')</td>
                                         </tr>
                                     @endforelse
                                     @if (count($columns) <= 1)
                                         <tr>
-                                            <td class="text-center">No Columns selected</td>
+                                            <td class="text-center">@lang('datagrid::grid.No Columns selected')</td>
                                         </tr>
                                     @endif
                                 </tbody>
@@ -173,7 +178,7 @@
                                 $endPage = $lastPage;
                             }
                         @endphp
-                        <div class="col-md-8 export-import">
+                        <div class="col-sm-8 export-import">
                             {{-- @if ($allowExport) --}}
                             <div class="input-group">
                                 <select name="export" id="export-type" class="form-control">
@@ -198,11 +203,14 @@
                                 </form>
                             </div>
                         </div>
+                        {{-- {{dump($data)}}
+                        {{dump($endPage)}}
+                        {{dd($startPage)}} --}}
                         @if (count($columns) > 1)
-                            <div class="col-md-4">
+                            <div class="col-sm-4">
                                 <nav>
                                     <ul class="pagination">
-                                        <li class="page-item">
+                                        <li class="page-item {{ $data->currentPage() == 1 ? 'disabled' : '' }}">
                                             <a class="page-link"
                                                 href="{{ $data->url($data->currentPage() - 1) . '&' . http_build_query(['rows-per-page' => request()->input('rows-per-page')]) }}"
                                                 aria-label="Previous">
@@ -216,7 +224,7 @@
                                                     href="{{ $urlPagination }}&page={{ $i }}">{{ $i }}</a>
                                             </li>
                                         @endfor
-                                        <li class="page-item">
+                                        <li class="page-item {{ !$data->hasMorePages() ? 'disabled' : '' }}">
                                             <a class="page-link"
                                                 href="{{ $data->url($data->currentPage() + 1) . '&' . http_build_query(['rows-per-page' => request()->input('rows-per-page')]) }}"
                                                 aria-label="Next">
@@ -327,8 +335,10 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="saveDataBtn" @if (isset($row['id'])) data-id="{{ $row['id'] }}" @else data-id="" @endif data-dismiss="modal">Save
-                    </button>
+                <button type="button" class="btn btn-primary" id="saveDataBtn"
+                    @if (isset($row['id'])) data-id="{{ $row['id'] }}" @else data-id="" @endif
+                    data-dismiss="modal">Save
+                </button>
             </div>
         </div>
     </div>

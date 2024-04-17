@@ -3,11 +3,9 @@
 namespace Datagrid\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
 class DataGridController extends Controller
@@ -47,16 +45,12 @@ class DataGridController extends Controller
             $deleted = $model::where('id', $id)->delete();
 
             if ($deleted) {
-                Cache::put('message', 'Your lead deleted successfully', 1);
-                Cache::put('message_type', 'success', 1);
+                return response()->json(['success' => true]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Failed to delete lead']);
             }
-
-            return redirect()->back();
         } catch (\Throwable $th) {
-            Cache::put('message', $th->getMessage(), 1);
-            Cache::put('message_type', 'error', 1);
-
-            return redirect()->back();
+            return response()->json(['success' => false, 'message' => $th->getMessage()]);
         }
     }
 
@@ -262,7 +256,7 @@ class DataGridController extends Controller
 
             $image = $request->file($imageField);
             $imageName = $image->getClientOriginalName();
-            $imagePath = $image->storeAs($modelName, $imageName, 'public');
+            $image->storeAs($modelName, $imageName, 'public');
             $insertData[$imageField] = $imageName;
 
         }
@@ -285,7 +279,7 @@ class DataGridController extends Controller
         if ($request->hasFile($imageField)) {
             $image = $request->file($imageField);
             $imageName = $image->getClientOriginalName();
-            $imagePath = $image->storeAs($modelName, $imageName, 'public');
+            $image->storeAs($modelName, $imageName, 'public');
             $modelData[$imageField] = $imageName;
         }
         $modelClass = '\\' . $request->model;

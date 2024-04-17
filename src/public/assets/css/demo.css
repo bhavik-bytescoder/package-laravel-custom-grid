@@ -140,7 +140,7 @@ body {
 
 .columns-list {
     display: inline-block;
-    width: 50%;
+    width: 30%;
     box-sizing: border-box;
     vertical-align: top;
 }
@@ -414,7 +414,7 @@ a {
 }
 
 body {
-    margin: 40px;
+    margin: 0 auto;
 }
 
 .dropdown {
@@ -426,7 +426,7 @@ body {
         padding: 12px;
         background: #fff;
         position: absolute;
-        top: 30px;
+        top: 38px;
         left: 2px;
         right: 2px;
         box-shadow: 0 1px 2px 1px rgba(0, 0, 0, .15);
@@ -439,7 +439,7 @@ body {
 
     .dropdown-option {
         display: block;
-        padding: 8px 12px;
+        padding: 5px 12px;
         opacity: 0;
         transition: opacity .15s ease-in-out;
     }
@@ -479,5 +479,63 @@ body {
         position: relative;
         top: -1px;
         margin-right: 4px;
+    }
+}
+
+
+.input-group > :not(:first-child):not(.dropdown-menu):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
+    margin-left: 2px;
+}
+.showing-rows-info select {
+    padding: 4px 15px 4px 5px;
+}
+.showing-rows-info select:focus-visible {
+    outline: none;
+}
+.form-group h5 {
+    margin: 15px 0px 5px 0px;
+}
+.fa-exchange {
+    transform: rotate(90deg);
+    color: #424242;
+}
+.select-z {
+    z-index: 9999;
+}
+.modal-open .modal-backdrop.show {
+    opacity: 0.5;
+    visibility: visible;
+}
+.modal-backdrop.show {
+    opacity: 0;
+    visibility: hidden;
+}
+@media only screen and (max-width: 1280px) {
+    button#delete-selected {
+        padding: 7px 10px;
+    }
+    .card{
+        overflow: auto;
+    }
+    .table-responsive {
+        padding: 0 0px;
+    }
+
+}
+@media only screen and (max-width: 1199px) {
+    button#delete-selected {
+        margin-top: 15px;
+    }
+    .input-group > .form-control, .input-group > .form-select {
+        width: 26%;
+    }
+}
+@media only screen and (max-width: 575px) {
+    .showing-rows-info.pull-right {
+        text-align: start;
+    }
+    ul.pagination {
+        display: flex;
+        width: 100%;
     }
 }

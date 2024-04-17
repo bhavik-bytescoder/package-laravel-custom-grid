@@ -19,10 +19,6 @@ class DatagridServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/public' => public_path('data-grid'),
         ]);
-
-        if ($this->app->getLocale() == 'pt-BR') {
-            $this->app->setLocale('pt_BR');
-        }
     }
 
     public function register()
