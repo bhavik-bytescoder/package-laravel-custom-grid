@@ -54,6 +54,7 @@ To begin using Custom DataGrid, follow these simple steps:
 4. **Autoload**: Refresh the Composer autoload files by running `composer dump-autoload`.
 
 5. **Include Assets**: Include the necessary JavaScript and CSS dependencies in your HTML to enable Custom DataGrid functionality.
+6. **Storage link with public** : ```php artisan storage:link```
 
 ### Dependencies
 
