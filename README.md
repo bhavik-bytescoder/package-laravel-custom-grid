@@ -71,6 +71,7 @@ Let's walk through a basic example of implementing Custom DataGrid in your Larav
 
 ```php
 use Datagrid\Facades\DataGridFacade;
+use Illuminate\Support\Facades\Session;
 
 public function index()
 {
