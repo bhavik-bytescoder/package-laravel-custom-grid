@@ -95,7 +95,7 @@ public function index()
         ->columnsAll($columnsAll)
         ->paginate(10);
 
-    return view('test', ['dataGrid' => $dataGrid]);
+    return view('your blade file', ['dataGrid' => $dataGrid]);
 }
 ```
 
