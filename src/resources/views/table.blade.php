@@ -122,7 +122,7 @@
                                                     @if ($column != 'id')
                                                         <td class="column" data-column="{{ $column }}">
                                                             @if ($column == config('datagrid.' . class_basename($model) . '_has_image'))
-                                                                <img src="{{ !empty($row[$column]) ? asset('storage/' . class_basename($model) . '/' . $row[$column]) : asset('storage/default/default.png') }}"
+                                                                <img src="{{ !empty($row[$column]) ? asset('storage/' . class_basename($model) . '/' . $row[$column]) : asset('default-image/default.jpg') }}"
                                                                     alt="Image" style="width: 100px; height: auto;">
                                                             @else
                                                                 {{ $row[$column] }}
@@ -153,7 +153,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="{{ count($columns) + (count($columns) > 1 ? 1 : 2) }}"
+                                            <td colspan="{{ count($columns) + (count($columns) > 1 ? 2 : 1) }}"
                                                 class="text-center">@lang('datagrid::grid.No results found.')</td>
                                         </tr>
                                     @endforelse

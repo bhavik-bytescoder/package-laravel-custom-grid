@@ -174,7 +174,7 @@
             var model = @json($model);
             var exportType = $('#export-type').val();
             if (!exportType) {
-                alert('Select a format for export!');
+                toastr.error('Select a format for export!');
                 return false;
             }
             $.ajax({
@@ -195,14 +195,16 @@
                     var fileName = response.file_name;
                     var downloadLink = document.createElement("a");
                     downloadLink.href = fileUrl;
-                    downloadLink.download =
-                        fileName;
+                    downloadLink.download = fileName;
                     document.body.appendChild(downloadLink);
                     downloadLink.click();
                     document.body.removeChild(downloadLink);
-                    setTimeout(() => {
-                        toastr.success(response.message);
-                    }, 1000);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: response.message,
+                    });
+
                     setTimeout(() => {
                         fetch('/delete-file?fileUrl=' + encodeURIComponent(fileUrl))
                             .then(response => {})
@@ -215,10 +217,19 @@
                     try {
                         var response = JSON.parse(xhr.responseText);
                         if (response.errorMessage) {
-                            toastr.error(response.errorMessage);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: response.errorMessage,
+                            });
+
                         } else {
                             console.error();
-                            toastr.error("An unknown error occurred to export file.");
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'An unknown error occurred to export file.',
+                            });
                         }
                     } catch (e) {
                         console.error("Error parsing JSON response: " + e.message);

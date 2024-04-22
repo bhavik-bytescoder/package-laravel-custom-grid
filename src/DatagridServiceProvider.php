@@ -3,6 +3,7 @@
 namespace Datagrid;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\File;
 
 class DatagridServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,23 @@ class DatagridServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/public' => public_path('data-grid'),
         ]);
+
+        // Get the source path of the image within your package
+        $sourceImagePath = __DIR__.'/public/default-image/default.jpg';
+
+        // Define the destination directory in the user's public storage
+        $destinationDirectory = public_path('default-image');
+
+        // Check if the destination directory exists, if not, create it
+        if (!File::exists($destinationDirectory)) {
+            File::makeDirectory($destinationDirectory, 0755, true);
+        }
+
+        // Define the destination path for the image
+        $destinationImagePath = $destinationDirectory . '/default.jpg';
+
+        // Copy the image from the package to the user's public storage
+        File::copy($sourceImagePath, $destinationImagePath);
     }
 
     public function register()

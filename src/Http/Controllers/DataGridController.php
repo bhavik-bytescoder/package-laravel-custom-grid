@@ -3,10 +3,12 @@
 namespace Datagrid\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class DataGridController extends Controller
 {
@@ -76,80 +78,63 @@ class DataGridController extends Controller
     public function exportData(Request $request)
     {
         try {
-            $searchValue = $request->input('filterSearch');
-            $allColumns = $request->input('allColumns');
-            $model = $request->input('model');
-            $searchColumns = $request->input('searchColumns');
-            $headers = isset($searchColumns) ? $searchColumns : $allColumns;
-            $headers = array_filter($headers, function ($header) {
-                return $header !== 'id';
-            });
+            $searchValue    = $request->input('filterSearch');
+            $allColumns     = $request->input('allColumns');
+            $model          = $request->input('model');
+            $searchColumns  = $request->input('searchColumns');
+            $headers        = $searchColumns ?? $allColumns;
+            $headers        = array_filter($headers, fn ($header) => $header !== 'id' && $header !== 'image' );
 
-            // Check if $headers array is empty or null
             if (empty($headers)) {
-                throw new \Exception('Select At Least one column to export file.');
+                throw new \Exception('Select at least one column to export file.');
             }
 
             $exportType = $request->input('exportType');
-            $fileName = 'export_' . time() . '.' . $exportType;
-            $filePath = public_path('storage/' . $fileName);
+            $fileName   = 'export_' . time() . '.' . $exportType;
+            $filePath   = Storage::path('public/' . $fileName);
 
             $file = fopen($filePath, 'w');
             if (!$file) {
                 throw new \Exception('Failed to open file for writing.');
             }
 
-            $headersWithSrNo = ['Sr.No'];
-            foreach ($headers as $header) {
-                $headersWithSrNo[] = strtoupper($header);
-            }
-            if ($exportType == 'tsv') {
-                fwrite($file, implode("\t", $headersWithSrNo) . PHP_EOL);
-            } else {
-                fputcsv($file, $headersWithSrNo);
-            }
+            $headersWithSrNo = ['Sr.No', ...array_map('strtoupper', $headers)];
+            fputcsv($file, $headersWithSrNo, $exportType == 'tsv' ? "\t" : ",");
 
             $query = $model::select($headers)->orderBy('created_at', 'DESC');
-            if ($searchValue !== null && !empty($searchColumns)) {
-                $query->where(function ($query) use ($searchValue, $searchColumns) {
-                    foreach ($searchColumns as $column) {
-                        $query->orWhere($column, 'like', '%' . $searchValue . '%');
-                    }
-                });
+            if ($searchValue && $searchColumns) {
+                $query->where(
+                    fn ($query) =>
+                    collect($searchColumns)->each(
+                        fn ($column) =>
+                        $query->orWhere($column, 'like', "%$searchValue%")
+                    )
+                );
             }
+
             $leads = $query->get();
             if ($leads->isEmpty()) {
-                throw new \Exception('No data available for export.');
+                throw new Exception('No data available for export.');
             }
 
             $increment = 1;
             foreach ($leads as $lead) {
-                $rowData = [$increment++];
-                foreach ($headers as $header) {
-                    $rowData[] = $lead->{$header};
-                }
-                if ($exportType == 'tsv') {
-                    fwrite($file, implode("\t", $rowData) . PHP_EOL);
-                } else {
-                    fputcsv($file, $rowData);
-                }
+                $rowData = [$increment++, ...array_map(fn ($header) => $lead->{$header}, $headers)];
+                fputcsv($file, $rowData, $exportType == 'tsv' ? "\t" : ",");
             }
 
             fclose($file);
-            $fileUrl = url('storage/' . $fileName);
-
-            $message = 'File Exported successfully';
+            $fileUrl = Storage::url($fileName);
 
             return response()->json([
                 'file_url' => $fileUrl,
                 'file_name' => $fileName,
-                'message' => $message,
+                'message' => 'File exported successfully',
             ]);
         } catch (\Exception $e) {
             return response()->json(['errorMessage' => $e->getMessage()], 500);
         }
     }
-
     public function importCSV(Request $request)
     {
         try {
@@ -240,7 +225,7 @@ class DataGridController extends Controller
     {
         // $imageField = config('datagrid.Customer_has_image');
         $modelName = class_basename($request->input('model'));
-        $imageField = config('datagrid.'. $modelName . '_has_image');
+        $imageField = config('datagrid.' . $modelName . '_has_image');
         $generateUniqueColumn = $modelName . '_unique_column';
         $uniqueColumn = config('datagrid.' . $generateUniqueColumn);
         $modelClass = '\\' . $request->model;
@@ -249,7 +234,7 @@ class DataGridController extends Controller
         // Check if the request contains a new image
         if ($request->hasFile($imageField)) {
             // Delete the old image from the public folder
-            $oldImagePath = public_path('storage/'.$modelName.'/' . $modelData->image);
+            $oldImagePath = public_path('storage/' . $modelName . '/' . $modelData->image);
             if (File::exists($oldImagePath)) {
                 File::delete($oldImagePath);
             }
@@ -258,7 +243,6 @@ class DataGridController extends Controller
             $imageName = $image->getClientOriginalName();
             $image->storeAs($modelName, $imageName, 'public');
             $insertData[$imageField] = $imageName;
-
         }
         if ($modelData->$uniqueColumn !== $insertData[$uniqueColumn]) {
             $existingUser = $modelClass::where($uniqueColumn, $insertData[$uniqueColumn])->first();
@@ -274,7 +258,7 @@ class DataGridController extends Controller
     {
         $modelData = $request->except('_token', 'model', 'image');
         $modelName = class_basename($request->input('model'));
-        $imageField = config('datagrid.'. $modelName . '_has_image');
+        $imageField = config('datagrid.' . $modelName . '_has_image');
 
         if ($request->hasFile($imageField)) {
             $image = $request->file($imageField);
